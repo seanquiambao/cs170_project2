@@ -1,6 +1,6 @@
 function formatted_cell = format_cell(cell)
-    num_cell = num2cell(cell);
-    formatted_cell =['{' strjoin(cellfun(@num2str, num_cell, 'UniformOutput', false), ', ') '}']; 
+num_cell = num2cell(cell);
+formatted_cell =['{' strjoin(cellfun(@num2str, num_cell, 'UniformOutput', false), ', ') '}'];
 end
 
 function accuracy= leave_one_out_cross_validation(data, current_set,feature_to_add)
@@ -44,7 +44,8 @@ end
 
 
 function feature_search_backward(data)
-disp(['Need to implement'])
+disp(['Beginning Search Algorithm'])
+
 end
 function feature_search_forward(data)
 disp(['Beginning Search Algorithm'])
@@ -59,13 +60,13 @@ for i = 1 : size(data, 2) - 1
     feature_to_add_at_this_level = [];
     best_so_far_accuracy = 0;
 
-    
+
 
     for k = 1 : size(data, 2) - 1
         if isempty(intersect(current_set_of_features, k))
-            
-            
-                       
+
+
+
             accuracy = leave_one_out_cross_validation(data, current_set_of_features, k + 1);
             formatted_cell = format_cell([current_set_of_features, k]);
             disp(['Considering features ', formatted_cell, ' with accuracy of ', num2str(accuracy)])
@@ -87,7 +88,7 @@ for i = 1 : size(data, 2) - 1
         best_accuracy = best_so_far_accuracy;
     end
 
-    
+
 end
 formatted_cell = format_cell(best_feature);
 disp(['Finished Search!! The best subset is ', formatted_cell, ' with an accuracy of ', num2str(best_accuracy)]);
