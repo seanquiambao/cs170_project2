@@ -3,15 +3,29 @@ num_cell = num2cell(cell);
 formatted_cell =['{' strjoin(cellfun(@num2str, num_cell, 'UniformOutput', false), ', ') '}'];
 end
 
-function accuracy= leave_one_out_cross_validation(data, current_set,feature_to_add)
-observe_features = [current_set, feature_to_add];
+function accuracy= leave_one_out_cross_validation(data, current_set, feature_to_add, algorithm)
+
 copy_data = data;
 
-for j = 1 : size(copy_data, 1)
-    if ~ismember(observe_features, j)
-        copy_data(:, j + 1) = 0;
+if algorithm == "forward"
+    observe_features = [current_set, feature_to_add];
+    % formatted_cell = format_cell(observe_features);
+    % display(["Forward set: ", formatted_cell]);
+    for j = 1 : size(copy_data, 1)
+        if ~ismember(observe_features, j)
+            copy_data(:, j + 1) = 0;
+        end
+    end
+else
+    % formatted_cell = format_cell(current_set);
+    % display(["Backward set: ", formatted_cell]);
+    for j = 1 : size(copy_data, 1)
+        if ~ismember(current_set, j)
+            copy_data(:, j + 1) = 0;
+        end
     end
 end
+
 
 number_correctly_classified = 0;
 
@@ -44,11 +58,56 @@ end
 
 
 function feature_search_backward(data)
-disp(['Beginning Search Algorithm'])
+disp(['Beginning Backward Elimination Algorithm'])
 
+current_set_of_features = 1:size(data,2) - 1;
+
+best_feature = [];
+best_accuracy = 0;
+
+for i = 1 : size(data, 2) - 1
+    disp(['On the ', num2str(i), 'th level of the search tree'])
+    feature_to_remove_at_this_level = 0;
+    worse_so_far_accuracy = inf;
+
+
+
+    for k = 1 : size(data, 2) - 1
+        if ~isempty(intersect(current_set_of_features, k))
+            index = (current_set_of_features == k);
+            current_copy = current_set_of_features;
+            current_copy(index) = [];
+            accuracy = leave_one_out_cross_validation(data, current_copy, k, 'backwards');
+            formatted_cell = format_cell(current_copy);
+            disp(['Considering features ', formatted_cell, ' with accuracy of ', num2str(accuracy)])
+
+            if accuracy <= worse_so_far_accuracy
+                worse_so_far_accuracy = accuracy;
+                feature_to_remove_at_this_level = k;
+            end
+
+            if accuracy > best_accuracy
+                best_feature = current_copy;
+                best_accuracy = accuracy;
+            end
+        end
+    end
+
+    index = (current_set_of_features == feature_to_remove_at_this_level);
+    current_set_of_features(index) = [];
+
+    formatted_cell = format_cell(current_set_of_features);
+    disp(['Feature Set ', formatted_cell, ' was worst, accuracy of ', num2str(worse_so_far_accuracy)]);
 end
+formatted_cell = format_cell(best_feature);
+disp(['Finished Search!! The best subset is ', formatted_cell, ' with an accuracy of ', num2str(best_accuracy)]);
+end
+
+
+
+
 function feature_search_forward(data)
-disp(['Beginning Search Algorithm'])
+disp(['Beginning Forward Selection Algorithm'])
 
 current_set_of_features = [];
 
@@ -64,12 +123,9 @@ for i = 1 : size(data, 2) - 1
 
     for k = 1 : size(data, 2) - 1
         if isempty(intersect(current_set_of_features, k))
-
-
-
-            accuracy = leave_one_out_cross_validation(data, current_set_of_features, k + 1);
+            accuracy = leave_one_out_cross_validation(data, current_set_of_features, k, "forward");
             formatted_cell = format_cell([current_set_of_features, k]);
-            disp(['Considering features ', formatted_cell, ' with accuracy of ', num2str(accuracy)])
+            disp(['-- Considering features ', formatted_cell, ' with accuracy of ', num2str(accuracy)])
 
             if accuracy > best_so_far_accuracy
                 best_so_far_accuracy = accuracy;
@@ -79,7 +135,6 @@ for i = 1 : size(data, 2) - 1
     end
 
     current_set_of_features(i) = feature_to_add_at_this_level;
-
     formatted_cell = format_cell(current_set_of_features);
     disp(['Feature Set ', formatted_cell, ' was best, accuracy of ', num2str(best_so_far_accuracy)]);
 
@@ -111,4 +166,11 @@ end
 end
 data = load("CS170_Small_Data__83.txt");
 
-main(data)
+% main(data)
+
+
+accuracy = leave_one_out_cross_validation(data, [3], 1, "forward");
+
+disp(["forward:", accuracy])
+accuracy = leave_one_out_cross_validation(data, [3,1], 0, "backward");
+disp(["backward:", accuracy])
