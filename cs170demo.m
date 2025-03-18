@@ -58,35 +58,35 @@ end
 
 
 function feature_search_backward(data)
-disp(['Beginning Backward Elimination Algorithm'])
+disp(['Beginning Search.'])
+
 
 current_set_of_features = 1:size(data,2) - 1;
 
 best_feature = [];
 best_accuracy = 0;
-
-    accuracy = leave_one_out_cross_validation(data, current_set_of_features, 0, 'backwards');
-    formatted_cell = format_cell(current_set_of_features);
-    disp(['Considering all features ', formatted_cell, ' with accuracy of ', num2str(accuracy)])
 for i = 1 : size(data, 2) - 1
-    disp(['On the ', num2str(i), 'th level of the search tree'])
     feature_to_remove_at_this_level = 0;
     best_so_far_accuracy = 0;
+    best_feature_set = [];
 
 
+    disp([' '])
 
     for k = 1 : size(data, 2) - 1
+        
         if ~isempty(intersect(current_set_of_features, k))
             index = (current_set_of_features == k);
             current_copy = current_set_of_features;
             current_copy(index) = [];
             accuracy = leave_one_out_cross_validation(data, current_copy, k, 'backwards');
             formatted_cell = format_cell(current_copy);
-            disp(['Considering features ', formatted_cell, ' with accuracy of ', num2str(accuracy)])
+            disp(['     Using feature(s) ', formatted_cell, ' accuracy is ', num2str(accuracy)])
 
             if accuracy > best_so_far_accuracy
                 best_so_far_accuracy = accuracy;
                 feature_to_remove_at_this_level = k;
+                best_feature_set = formatted_cell;
             end
 
             if accuracy > best_accuracy
@@ -98,18 +98,19 @@ for i = 1 : size(data, 2) - 1
 
     index = (current_set_of_features == feature_to_remove_at_this_level);
     current_set_of_features(index) = [];
-
-    disp(['Feature ', num2str(feature_to_remove_at_this_level), ' is irrelevant, accuracy of ', num2str(best_so_far_accuracy)]);
+    disp([' '])
+    disp(['Feature set ', best_feature_set, ' was the best, accuracy is ', num2str(best_so_far_accuracy)]);
 end
 formatted_cell = format_cell(best_feature);
-disp(['Finished Search!! The best subset is ', formatted_cell, ' with an accuracy of ', num2str(best_accuracy)]);
+disp([' '])
+disp(['Finished Search!! The best subset is ', formatted_cell, ', which has an accuracy of ', num2str(best_accuracy)]);
 end
 
 
 
 
 function feature_search_forward(data)
-disp(['Beginning Forward Selection Algorithm'])
+disp(['Beginning Search.'])
 
 current_set_of_features = [];
 
@@ -117,20 +118,15 @@ best_feature = [];
 best_accuracy = 0;
 
 for i = 1 : size(data, 2) - 1
-    disp(['On the ', num2str(i), 'th level of the search tree'])
     feature_to_add_at_this_level = [];
     best_so_far_accuracy = 0;
 
-
-    accuracy = leave_one_out_cross_validation(data, current_set_of_features, 1, "blank");
-    formatted_cell = format_cell(current_set_of_features);
-    disp(['-- Considering feature(s) ', formatted_cell, ' with accuracy of ', num2str(accuracy)])
-
+    disp(' ')
     for k = 1 : size(data, 2) - 1
         if isempty(intersect(current_set_of_features, k))
             accuracy = leave_one_out_cross_validation(data, current_set_of_features, k, "forward");
             formatted_cell = format_cell([current_set_of_features, k]);
-            disp(['-- Considering features ', formatted_cell, ' with accuracy of ', num2str(accuracy)])
+            disp(['     Using feature(s) ', formatted_cell, ' accuracy is ', num2str(accuracy)])
 
             if accuracy > best_so_far_accuracy
                 best_so_far_accuracy = accuracy;
@@ -139,29 +135,49 @@ for i = 1 : size(data, 2) - 1
         end
     end
 
-    current_set_of_features(i) = feature_to_add_at_this_level;
-    formatted_cell = format_cell(current_set_of_features);
-    disp(['Feature Set ', formatted_cell, ' was best, accuracy of ', num2str(best_so_far_accuracy)]);
-
+    disp(' ')
+    
     if best_so_far_accuracy > best_accuracy
         best_feature = current_set_of_features;
         best_accuracy = best_so_far_accuracy;
+    else
+        disp(['(Warning, Accuracy has decreased! Continuing search in case of local maxima)'])
     end
+    current_set_of_features(i) = feature_to_add_at_this_level;
+    formatted_cell = format_cell(current_set_of_features);
+    disp(['Feature Set ', formatted_cell, ' was best, accuracy is ', num2str(best_so_far_accuracy)]);
+
+
 
 
 end
 formatted_cell = format_cell(best_feature);
-disp(['Finished Search!! The best subset is ', formatted_cell, ' with an accuracy of ', num2str(best_accuracy)]);
+disp([' '])
+disp(['Finished Search!! The best subset is ', formatted_cell, ', which has an accuracy of ', num2str(best_accuracy)]);
 end
 
-function main(data)
+function main()
+disp(['Welcome to Sean Quiambaos Feature Selection Algorithm'])
+input_data = input("Type the data you want to run: ");
+data = load(input_data);
+disp([' '])
 disp(['Type the number of algorithm you want to run:'])
 disp(['1. Forward Selection'])
 disp(['2. Backward Elimination'])
 
-prompt = input("Enter a number:");
+prompt = input("");
 
+number_of_features = size(data, 2) - 1;
+full_accuracy = leave_one_out_cross_validation(data, 1:size(data,2) - 1, 0, "forward");
 
+disp([' '])
+
+disp(['This dataset has ', num2str(number_of_features), ' features (not including class attribute), with ', num2str(size(data, 1)), ' instances.'])
+
+disp([' '])
+
+disp(['Running nearest neighbor with all 4 features, using "leave-one-out" evaluation, I get an accuracy of ', num2str(full_accuracy)])
+disp([' '])
 if prompt == 1
     feature_search_forward(data)
 else
@@ -169,9 +185,8 @@ else
 end
 
 end
-data = load("CS170_Small_Data__83.txt");
 
-main(data)
+main()
 
 
 % accuracy = leave_one_out_cross_validation(data, [3], 1, "forward");
