@@ -187,10 +187,3 @@ end
 end
 
 main()
-
-
-% accuracy = leave_one_out_cross_validation(data, [3], 1, "forward");
-% 
-% disp(["forward:", accuracy])
-% accuracy = leave_one_out_cross_validation(data, [3,1], 0, "backward");
-% disp(["backward:", accuracy])
