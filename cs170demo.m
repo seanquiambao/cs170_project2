@@ -81,7 +81,7 @@ for i = 1 : size(data, 2) - 1
             current_copy(index) = [];
             accuracy = leave_one_out_cross_validation(data, current_copy, k, 'backwards');
             formatted_cell = format_cell(current_copy);
-            disp(['     Using feature(s) ', formatted_cell, ' accuracy is ', num2str(accuracy)])
+            disp(['     Using feature(s) ', formatted_cell, ' accuracy is ', num2str(accuracy * 100), '%'])
 
             if accuracy > best_so_far_accuracy
                 best_so_far_accuracy = accuracy;
@@ -99,11 +99,11 @@ for i = 1 : size(data, 2) - 1
     index = (current_set_of_features == feature_to_remove_at_this_level);
     current_set_of_features(index) = [];
     disp([' '])
-    disp(['Feature set ', best_feature_set, ' was the best, accuracy is ', num2str(best_so_far_accuracy)]);
+    disp(['Feature set ', best_feature_set, ' was the best, accuracy is ', num2str(best_so_far_accuracy * 100), '%']);
 end
 formatted_cell = format_cell(best_feature);
 disp([' '])
-disp(['Finished Search!! The best subset is ', formatted_cell, ', which has an accuracy of ', num2str(best_accuracy)]);
+disp(['Finished Search!! The best subset is ', formatted_cell, ', which has an accuracy of ', num2str(best_accuracy * 100), '%']);
 end
 
 
@@ -126,7 +126,7 @@ for i = 1 : size(data, 2) - 1
         if isempty(intersect(current_set_of_features, k))
             accuracy = leave_one_out_cross_validation(data, current_set_of_features, k, "forward");
             formatted_cell = format_cell([current_set_of_features, k]);
-            disp(['     Using feature(s) ', formatted_cell, ' accuracy is ', num2str(accuracy)])
+            disp(['     Using feature(s) ', formatted_cell, ' accuracy is ', num2str(accuracy * 100), '%'])
 
             if accuracy > best_so_far_accuracy
                 best_so_far_accuracy = accuracy;
@@ -145,7 +145,7 @@ for i = 1 : size(data, 2) - 1
     end
     current_set_of_features(i) = feature_to_add_at_this_level;
     formatted_cell = format_cell(current_set_of_features);
-    disp(['Feature Set ', formatted_cell, ' was best, accuracy is ', num2str(best_so_far_accuracy)]);
+    disp(['Feature Set ', formatted_cell, ' was best, accuracy is ', num2str(best_so_far_accuracy * 100), '%']);
 
 
 
@@ -153,7 +153,7 @@ for i = 1 : size(data, 2) - 1
 end
 formatted_cell = format_cell(best_feature);
 disp([' '])
-disp(['Finished Search!! The best subset is ', formatted_cell, ', which has an accuracy of ', num2str(best_accuracy)]);
+disp(['Finished Search!! The best subset is ', formatted_cell, ', which has an accuracy of ', num2str(best_accuracy * 100), '%']);
 end
 
 function main()
@@ -176,7 +176,7 @@ disp(['This dataset has ', num2str(number_of_features), ' features (not includin
 
 disp([' '])
 
-disp(['Running nearest neighbor with all 4 features, using "leave-one-out" evaluation, I get an accuracy of ', num2str(full_accuracy)])
+disp(['Running nearest neighbor with all 4 features, using "leave-one-out" evaluation, I get an accuracy of ', num2str(full_accuracy * 100), '%'])
 disp([' '])
 if prompt == 1
     feature_search_forward(data)
